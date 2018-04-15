@@ -1,6 +1,7 @@
 import time
 import RPi.GPIO as GPIO
 import lcddriver
+import math
 
 pinstep = 11
 pindirection = 18
@@ -18,6 +19,8 @@ def starten():
     GPIO.setup(pinstep, GPIO.OUT)
     # Pin 18 (GPIO 24) auf Output setzen
     GPIO.setup(pindirection, GPIO.OUT)
+    GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Endanschlag
+    
     
     maxanzahldrehungen = 4800
     mindauer = 0.0015
@@ -25,6 +28,24 @@ class schritte:
     def __init__(self):
         print("Jetzt wurde __init__ ausgefuehrt")
 
+    def getbargraph(self, prozent=0):
+        zeichen = ""
+        anzahlzeichen = 10.0
+        anzahlvoll = int(math.floor(prozent/anzahlzeichen))
+        for i in range(anzahlvoll):
+            zeichen = zeichen + "*"
+        anzahlhalb = 0
+        if (prozent-anzahlvoll*anzahlzeichen)>=5:
+            anzahlhalb = 1
+        for i in range(anzahlhalb):
+            zeichen = zeichen + "/"
+        anzahlleer = int(anzahlzeichen-anzahlvoll-anzahlhalb)
+        for i in range(anzahlleer):
+            zeichen = zeichen +" "
+        print("Voll:" + str(anzahlvoll))
+        print("Halb:" + str(anzahlhalb))
+        print("Leer:" + str(anzahlleer))
+        return zeichen
         
     def run(self, anzahl, dauer, richtung=0):
         print("Bis hierhin kommt er")
@@ -44,6 +65,11 @@ class schritte:
         schrittdauer = float(dauer)/anzahl
         try:
             for i in range(anzahl):
+                input_anschlag = GPIO.input(19)
+                if input_anschlag == True:
+                    print("Endanschlag erreicht")
+                    zeile[0]=str(richtungtext) + " Endanschlag!"
+                    break
                 GPIO.output(pinstep, GPIO.HIGH)
                 time.sleep(schrittdauer/2) # Einheit ist Sekunden, moegliche Notation: 1.0/100
                 GPIO.output(pinstep, GPIO.LOW)
@@ -51,14 +77,22 @@ class schritte:
                 i = i + 1
                 print i/float(anzahl)
                 dauer = dauer - schrittdauer
-                zeile[0]=str(richtungtext) + "  ETA: " + str(dauer).zfill(6)
-                zeile[1]=str(i).zfill(4)+" "+ str(i/float(anzahl)*100.0).zfill(4)+"%"
+                zeile[0]=str(richtungtext) + "  ETA: " + str(round(dauer,1)).zfill(6)
+                
+                # Fortschrittsbalken holen
+                fortschritt=schritte.getbargraph(self,100*i/float(anzahl))
+                print(fortschritt)
+                
+                zeile[1]=str(i).zfill(4)+"  "+ fortschritt
                 lcd.lcd_display_string(zeile[0], 1)
                 lcd.lcd_display_string(zeile[1], 2)
         except KeyboardInterrupt:
             print("Unterbrochen")
             lcd.lcd_display_string("abgebrochen", 1)
             lcd.lcd_display_string(str(i), 2)
+        finally:
+            lcd.lcd_display_string(zeile[0], 1)
+            lcd.lcd_display_string(zeile[1], 2)
         print("Schritte gemacht!")
-            #lcd.lcd_display_string("Fertig!",1
+            #lcd.lcd_display_string("Fertig!",1)
             #lcd.lcd_display_string(str(anzahl)+" Schritte",2)

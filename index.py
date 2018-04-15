@@ -15,7 +15,7 @@ GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP) # -
 GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Modus
 
 # anzahl Bilder, Stunden, Minuten, Sekunden, Richtung
-minimalwerte = [2, 0, 0, 10, 0]
+minimalwerte = [200, 0, 0, 10, 0]
 maximalwerte = [9999, 99, 59, 59, 1]
 praefix = [">"," ", "h", "m", "s"]
 praefixstandard = [" "," ", "h", "m", "s"]
@@ -31,6 +31,7 @@ while True:
         # Unterscheidung der Buttons die gedrueckt sind
         if input_plus == False and input_minus == False:
             print("zwei gedrueckt")
+            i=i-1
         elif input_plus == False:
             einstellungen[i] = einstellungen[i] + 1  
         elif input_minus == False:
@@ -58,10 +59,9 @@ while True:
         elif i == len(einstellungen):
             status[0] = "Starten? Push M!"
             status[1] = praefix[0] + str(einstellungen[0]).zfill(4) + praefix[1] + str(einstellungen[1]).zfill(2) + praefix[2] + str(einstellungen[2]).zfill(2) + praefix[3] + str(einstellungen[3]).zfill(2) + praefix[4]
+            print("Letzte Pause")
             # Einstellungen sind getan, los gehts!
         elif i == len(einstellungen)+1:
-            print("Letzte Pause")
-        elif i == len(einstellungen) + 2:
             # anzahl, dauer, richtung=0
             dauer = einstellungen[1]*3600 + einstellungen[2]*60 + einstellungen[3]
             schritte.run(einstellungen[0], dauer, einstellungen[4])
