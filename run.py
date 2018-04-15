@@ -33,14 +33,14 @@ class schritte:
         zeile=["Fotoschiene","ist cool"]
         # Drehrichtung behandeln
         if richtung == 0:
-            richtungtext = "A->B"
+            richtungtext = "A>B"
         else:
             richtung = 1
-            richtungtext = "B->A"
+            richtungtext = "B>A"
         # Drehrichtung vorgeben
         GPIO.output(pindirection, richtung)
         # Dauer der Schritte
-        schrittdauer = float(dauer/anzahl)
+        schrittdauer = float(dauer)/anzahl
         try:
             for i in range(anzahl):
                 GPIO.output(pinstep, GPIO.HIGH)
@@ -49,7 +49,8 @@ class schritte:
                 time.sleep(schrittdauer/2) # Das schnellste: 0.0015
                 i = i + 1
                 print i/float(anzahl)
-                zeile[0]=str(richtungtext)
+                dauer = dauer - schrittdauer
+                zeile[0]=str(richtungtext) + " ETA: " + str(dauer)
                 zeile[1]=str(i)+" "+ str(i/float(anzahl)*100.0)+"%"
                 lcd.lcd_display_string(zeile[0], 1)
                 lcd.lcd_display_string(zeile[1], 2)
@@ -57,3 +58,5 @@ class schritte:
             print("Unterbrochen")
             lcd.lcd_display_string("abgebrochen", 1)
             lcd.lcd_display_string(str(i), 2)
+        lcd.lcd_display_string("Fertig!",1
+        lcd.lcd_display_string(str(i)+" Schritte",2)
