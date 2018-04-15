@@ -27,6 +27,7 @@ class schritte:
 
         
     def run(self, anzahl, dauer, richtung=0):
+        print("Bis hierhin kommt er")
         global pindirection
         global pinstep
         global lcd
@@ -50,13 +51,14 @@ class schritte:
                 i = i + 1
                 print i/float(anzahl)
                 dauer = dauer - schrittdauer
-                zeile[0]=str(richtungtext) + " ETA: " + str(dauer)
-                zeile[1]=str(i)+" "+ str(i/float(anzahl)*100.0)+"%"
+                zeile[0]=str(richtungtext) + "  ETA: " + str(dauer).zfill(6)
+                zeile[1]=str(i).zfill(4)+" "+ str(i/float(anzahl)*100.0).zfill(4)+"%"
                 lcd.lcd_display_string(zeile[0], 1)
                 lcd.lcd_display_string(zeile[1], 2)
         except KeyboardInterrupt:
             print("Unterbrochen")
             lcd.lcd_display_string("abgebrochen", 1)
             lcd.lcd_display_string(str(i), 2)
-        lcd.lcd_display_string("Fertig!",1
-        lcd.lcd_display_string(str(i)+" Schritte",2)
+        print("Schritte gemacht!")
+            #lcd.lcd_display_string("Fertig!",1
+            #lcd.lcd_display_string(str(anzahl)+" Schritte",2)
