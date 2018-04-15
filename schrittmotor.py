@@ -25,11 +25,11 @@ GPIO.setup(pindirection, GPIO.OUT)
 GPIO.output(pindirection, GPIO.LOW)
 # Schleife um den Motor drehen zu lassen
 
-while i < 200:
+while i < 10:
 	GPIO.output(pinstep, GPIO.HIGH)
-	time.sleep(0.01)
+	time.sleep(0.0015) # Einheit ist Sekunden, mögliche Notation: 1.0/100
 	GPIO.output(pinstep, GPIO.LOW)
-	time.sleep(0.01)
+	time.sleep(0.0015) # Das schnellste: 0.0015
 	i = i + 1
 	print i
 # Drehrichtung aendern
@@ -38,7 +38,7 @@ i = 0
 GPIO.output(pindirection, GPIO.HIGH)
 time.sleep(1)
 #GPIO.output(pindirection, GPIO.LOW)
-while i < 200:
+while i < 4800:
 	GPIO.output(pinstep, GPIO.HIGH)
 	time.sleep(0.01)
 	GPIO.output(pinstep, GPIO.LOW)
