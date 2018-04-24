@@ -11,8 +11,7 @@ def starten():
     global lcd
     lcd.lcd_clear()
     # GPIO einbinden und reinigen 
-    GPIO.setwarnings(False)
-    GPIO.cleanup()
+    GPIO.setwarnings(True)
     # RPi.GPIO Layout verwenden (wie Pin-Nummern)
     GPIO.setmode(GPIO.BOARD)
     # Pin 11 (GPIO 17) auf Output setzen
@@ -45,7 +44,6 @@ class schritte:
         return zeichen
         
     def run(self, anzahl, dauer, richtung=0):
-        print("Bis hierhin kommt er")
         global pindirection
         global pinstep
         global lcd
@@ -59,51 +57,34 @@ class schritte:
         # Drehrichtung vorgeben
         GPIO.output(pindirection, richtung)
         # Dauer der Schritte
-        SCHRITTDAUER = float(dauer)/anzahl
-        SCHRITTE_IN_10SEK = anzahl / (float(dauer) / 10)
-        
-        # Vor dem Start das Display mit Infos fuettern
-        fortschritt=schritte.getbargraph(self,0)
-        zeile[0]=str(richtungtext) + "  ETA: " + str(round(dauer,1)).zfill(6)
-        zeile[1]=str(0).zfill(4)+"  "+ fortschritt
-        lcd.lcd_display_string(zeile[0], 1)
-        lcd.lcd_display_string(zeile[1], 2)
+        schrittdauer = float(dauer)/anzahl
+        print("Hier passt es noch!")
         try:
-            k=0
             for i in range(anzahl):
-                t = time.time()
                 input_anschlag = GPIO.input(19)
                 if input_anschlag == True:
                     print("Endanschlag erreicht")
                     zeile[0]=str(richtungtext) + " Endanschlag!"
-                    break
-                
+                    i = anzahl-1
+                    #break
                 GPIO.output(pinstep, GPIO.HIGH)
-                #time.sleep(SCHRITTDAUER/2) # Einheit ist Sekunden, moegliche Notation: 1.0/100
+                time.sleep(schrittdauer/2) # Einheit ist Sekunden, moegliche Notation: 1.0/100
                 GPIO.output(pinstep, GPIO.LOW)
-                time.sleep(SCHRITTDAUER) # Das schnellste: 0.0015
+                time.sleep(schrittdauer/2) # Das schnellste: 0.0015
                 i = i + 1
-                dauer = dauer - SCHRITTDAUER
-                #Display nur selten aktualisieren, weil es lange dauert.
-                if k > SCHRITTE_IN_10SEK:
-                    # Fortschrittsbalken holen
-                    fortschritt=schritte.getbargraph(self,100*i/float(anzahl))
-                    zeile[0]=str(richtungtext) + "  ETA: " + str(round(dauer,1)).zfill(6)
-                    zeile[1]=str(i).zfill(4)+"  "+ fortschritt
-                    lcd.lcd_display_string(zeile[0], 1)
-                    lcd.lcd_display_string(zeile[1], 2)
-                    k = 0
-                k = k + 1
-                tend = time.time() - t
-                print("Echte Dauer: " + str(tend) + " - Schrittdauer" + str(SCHRITTDAUER))
+                dauer = dauer - schrittdauer
+                zeile[0]=str(richtungtext) + "  ETA: " + str(round(dauer,1)).zfill(6)
+                
+                # Fortschrittsbalken holen
+                fortschritt=schritte.getbargraph(self,100*i/float(anzahl))
+                zeile[1]=str(i).zfill(4)+"  "+ fortschritt
+                lcd.lcd_display_string(zeile[0], 1)
+                lcd.lcd_display_string(zeile[1], 2)
         except KeyboardInterrupt:
             print("Unterbrochen")
             lcd.lcd_display_string("abgebrochen", 1)
             lcd.lcd_display_string(str(i), 2)
         finally:
-            fortschritt=schritte.getbargraph(self,100)
-            zeile[0]=str(richtungtext) + "  ETA: " + str(0).zfill(6)
-            zeile[1]=str(i).zfill(4)+"  "+ fortschritt
             lcd.lcd_display_string(zeile[0], 1)
             lcd.lcd_display_string(zeile[1], 2)
         print("Schritte gemacht!")
